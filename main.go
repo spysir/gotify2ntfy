@@ -70,6 +70,7 @@ type Config struct {
 	NtfyAuthToken string
 	NtfyPriority  int
 	NtfyIcon      string
+	NtfyClick     string
 	SplitTopics   bool
 	SyncInterval  time.Duration
 	Debug         bool
@@ -88,6 +89,7 @@ func loadConfig() (*Config, error) {
 		NtfyTopic:     os.Getenv("NTFY_TOPIC"),
 		NtfyAuthToken: os.Getenv("NTFY_AUTH_TOKEN"),
 		NtfyIcon:      os.Getenv("NTFY_ICON"),
+		NtfyClick:     os.Getenv("NTFY_CLICK"),
 		Timezone:      os.Getenv("TZ"),
 		AppsDBPath:    os.Getenv("GOTIFY_APPS_DB"),
 	}
@@ -301,6 +303,10 @@ func sendNtfy(cfg *Config, topic, title, body string, priority int) error {
     if cfg.NtfyIcon != "" {
         req.Header.Set("Icon", cfg.NtfyIcon)
     }
+
+	if cfg.NtfyClick != "" {
+        req.Header.Set("Click", cfg.NtfyClick)
+    }
 	
 	req.Header.Set("Priority", fmt.Sprint(mapGotifyToNtfyPriority(priority)))
 	req.Header.Set("Content-Type", "text/plain; charset=utf-8")
@@ -502,6 +508,11 @@ func forwardToNtfy(cfg *Config, store *AppStore, msg GotifyMessage) error {
 	if cfg.NtfyIcon != "" {
         req.Header.Set("Icon", cfg.NtfyIcon)
         dbg(cfg, "Using icon: %s", cfg.NtfyIcon)
+    }
+
+	if cfg.NtfyClick != "" {
+        req.Header.Set("Click", cfg.NtfyClick)
+        dbg(cfg, "Using click: %s", cfg.NtfyClick)
     }
 
 	client := &http.Client{Timeout: 10 * time.Second}
